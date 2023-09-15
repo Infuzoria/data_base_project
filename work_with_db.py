@@ -86,3 +86,45 @@ class DBManager:
 
         conn.close()
         return avg_salary
+
+    def get_vacancies_with_higher_salary_from(self):
+        """Получает список всех вакансий, у которых нижний уровень зарплаты
+        выше средней по всем вакансиям"""
+
+        avg_salary_from = self.get_avg_salary_from()
+        conn = psycopg2.connect(dbname=self.name, **self.__params)
+        with conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT company_name, vacancy_name, 
+                salary_from, salary_to, currency, url
+                FROM vacancies
+                INNER JOIN companies USING(company_id)
+                WHERE salary_from > {avg_salary_from}
+                """
+            )
+            rows = cur.fetchall()
+
+        conn.close()
+        return rows
+
+    def get_vacancies_with_higher_salary_to(self):
+        """Получает список всех вакансий, у которых верхний уровень зарплаты
+        выше средней по всем вакансиям"""
+
+        avg_salary_to = self.get_avg_salary_to()
+        conn = psycopg2.connect(dbname=self.name, **self.__params)
+        with conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT company_name, vacancy_name, 
+                salary_from, salary_to, currency, url
+                FROM vacancies
+                INNER JOIN companies USING(company_id)
+                WHERE salary_from > {avg_salary_to}
+                """
+            )
+            rows = cur.fetchall()
+
+        conn.close()
+        return rows

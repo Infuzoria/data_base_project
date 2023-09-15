@@ -1,4 +1,5 @@
 import requests
+import psycopg2
 from math import ceil
 COMPANY_NAMES = ['Diasoft', 'Softline', 'SKYPRO', 'VK', 'Вебиум', 'Гринатом', 'Лаборатория Касперского',
                  'Лига Цифровой Экономики', 'Московская Биржа', 'РТУ МИРЭА']
@@ -64,3 +65,50 @@ def vacancies_get_info(company_ids: dict[str, str]) -> list[dict]:
                 vacancies_info.append(data)
 
     return vacancies_info
+
+
+def create_database(database_name: str, params: dict) -> None:
+    """Создание базы данных для сохранения данных о компаниях и вакансиях"""
+    conn = psycopg2.connect(dbname='postgres', **params)
+    conn.autocommit = True
+    cur = conn.cursor()
+
+    try:
+        cur.execute(f'CREATE DATABASE {database_name}')
+    except Exception:
+        cur.execute(f'DROP DATABASE {database_name}')
+        cur.execute(f'CREATE DATABASE {database_name}')
+
+    conn.close()
+
+    conn = psycopg2.connect(dbname=database_name, **params)
+
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            CREATE TABLE companies (
+                company_id INTEGER PRIMARY KEY,
+                company_name VARCHAR(100) NOT NULL,
+                description TEXT,
+                open_vacancies INTEGER
+            )
+            """
+        )
+
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            CREATE TABLE vacancies (
+                vacancy_id INTEGER PRIMARY KEY,
+                vacancy_name TEXT,
+                company_id INT REFERENCES companies(company_id),
+                salary_from INTEGER,
+                salary_to INTEGER,
+                currency VARCHAR(5),
+                url TEXT
+            )
+            """
+        )
+
+    conn.commit()
+    conn.close()

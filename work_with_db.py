@@ -87,7 +87,7 @@ class DBManager:
         conn.close()
         return avg_salary
 
-    def get_vacancies_with_higher_salary_from(self):
+    def get_vacancies_with_higher_salary_from(self) -> list[tuple]:
         """Получает список всех вакансий, у которых нижний уровень зарплаты
         выше средней по всем вакансиям"""
 
@@ -108,7 +108,7 @@ class DBManager:
         conn.close()
         return rows
 
-    def get_vacancies_with_higher_salary_to(self):
+    def get_vacancies_with_higher_salary_to(self) -> list[tuple]:
         """Получает список всех вакансий, у которых верхний уровень зарплаты
         выше средней по всем вакансиям"""
 
@@ -122,6 +122,27 @@ class DBManager:
                 FROM vacancies
                 INNER JOIN companies USING(company_id)
                 WHERE salary_from > {avg_salary_to}
+                """
+            )
+            rows = cur.fetchall()
+
+        conn.close()
+        return rows
+
+    def get_vacancies_with_keyword(self, keyword: str) -> list[tuple]:
+        """Получает список всех вакансий, в названии которых
+        содержится переданное в метод слово"""
+
+        conn = psycopg2.connect(dbname=self.name, **self.__params)
+        with conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT company_name, vacancy_name, 
+                salary_from, salary_to, currency, url
+                FROM vacancies
+                INNER JOIN companies USING(company_id)
+                WHERE vacancy_name LIKE '%{keyword.lower()}%'
+                OR vacancy_name LIKE '%{keyword.title()}%'
                 """
             )
             rows = cur.fetchall()

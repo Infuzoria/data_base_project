@@ -1,13 +1,12 @@
 import psycopg2
-from config import config
 
 
 class DBManager:
     """Класс для работы с базой данных"""
 
-    def __init__(self, database_name: str):
+    def __init__(self, database_name: str, params: dict):
         self.name = database_name
-        self.__params = config()
+        self.__params = params
 
     def get_companies_and_vacancies_count(self) -> dict[str, int]:
         """Получает список всех компаний и количество вакансий у каждой компании"""

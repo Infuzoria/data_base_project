@@ -45,7 +45,7 @@ class DBManager:
         conn.close()
         return rows
 
-    def get_all_vacancies(self):
+    def get_all_vacancies(self) -> list[tuple]:
         """Получает список всех вакансий с указанием названия компании,
         названия вакансии и зарплаты и ссылки на вакансию"""
 
@@ -64,3 +64,25 @@ class DBManager:
 
         conn.close()
         return rows
+
+    def get_avg_salary_from(self) -> float:
+        """Получает среднюю зарплату по вакансиям по нижней границе"""
+
+        conn = psycopg2.connect(dbname=self.name, **self.__params)
+        with conn.cursor() as cur:
+            cur.execute("""SELECT AVG(salary_from) FROM vacancies""")
+            avg_salary = float(cur.fetchone()[0])
+
+        conn.close()
+        return avg_salary
+
+    def get_avg_salary_to(self) -> float:
+        """Получает среднюю зарплату по вакансиям по верхней границе"""
+
+        conn = psycopg2.connect(dbname=self.name, **self.__params)
+        with conn.cursor() as cur:
+            cur.execute("""SELECT AVG(salary_to) FROM vacancies""")
+            avg_salary = float(cur.fetchone()[0])
+
+        conn.close()
+        return avg_salary

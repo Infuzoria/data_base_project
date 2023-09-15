@@ -1,6 +1,5 @@
 import psycopg2
 from config import config
-from pandas import DataFrame
 
 
 class DBManager:
@@ -39,6 +38,26 @@ class DBManager:
                 FROM vacancies
                 INNER JOIN companies USING(company_id)
                 WHERE company_name = '{company_name}'
+                """
+            )
+            rows = cur.fetchall()
+
+        conn.close()
+        return rows
+
+    def get_all_vacancies(self):
+        """Получает список всех вакансий с указанием названия компании,
+        названия вакансии и зарплаты и ссылки на вакансию"""
+
+        conn = psycopg2.connect(dbname=self.name, **self.__params)
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT company_name, vacancy_name,
+                salary_from, salary_to, currency, url
+                FROM vacancies
+                INNER JOIN companies USING(company_id)
+                ORDER BY company_name
                 """
             )
             rows = cur.fetchall()

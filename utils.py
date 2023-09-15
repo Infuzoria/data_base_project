@@ -112,3 +112,42 @@ def create_database(database_name: str, params: dict) -> None:
 
     conn.commit()
     conn.close()
+
+
+def save_data_to_companies(data: list[dict], database_name: str, params: dict) -> None:
+    """Сохранение данных в таблицу companies"""
+
+    conn = psycopg2.connect(dbname=database_name, **params)
+
+    with conn.cursor() as cur:
+        for company in data:
+            cur.execute(
+                """
+                INSERT INTO companies (company_id, company_name, description, open_vacancies)
+                VALUES (%s, %s, %s, %s)
+                """,
+                (int(company['id']), company['name'], company['description'], int(company['open_vacancies']))
+            )
+
+    conn.commit()
+    conn.close()
+
+
+def save_data_to_vacancies(data: list[dict], database_name: str, params: dict) -> None:
+    """Сохранение данных в таблицу vacancies"""
+
+    conn = psycopg2.connect(dbname=database_name, **params)
+
+    with conn.cursor() as cur:
+        for vacancy in data:
+            cur.execute(
+                """
+                INSERT INTO vacancies (vacancy_id, vacancy_name, company_id, salary_from, salary_to, currency, url)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """,
+                (int(vacancy['id']), vacancy['name'], int(vacancy['company_id']), vacancy['salary_from'],
+                 vacancy['salary_to'], vacancy['currency'], vacancy['url'])
+            )
+
+    conn.commit()
+    conn.close()
